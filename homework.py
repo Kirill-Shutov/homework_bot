@@ -5,7 +5,8 @@ from turtle import update
 
 from pprint import pprint
 import requests
-
+from telegram import Bot
+import telegram
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -76,7 +77,7 @@ def check_response(response):
         # response = requests.get(ENDPOINT)
         # print(response.json()['homeworks'])
         homework_list = response.json()['homeworks']
-        logger.info(f'Получен корректный API')
+        logger.info(f'Получен корректный API: {homework_list}')
         # pprint(homework_list)
     except Exception as error:
         logger.error(f'Полученный API некоректен: {error}')
@@ -86,53 +87,52 @@ def parse_status(homework):
     """Проверяет статус конкретной домашней работы."""
     try:
         homework_name = homework['homework_name']
-        logger.info(f'Получен ключ homework_name')
+        logger.info(f'Получен ключ: {homework_name}')
     except Exception as error:
         logger.error(f'Ключа homework_name нет: {error}')
     try:
         homework_status = homework['status']
-        logger.info(f'Получен ключ status')
+        logger.info(f'Получен ключ: {homework_status}')
     except Exception as error:
         logger.error(f'Ключа status нет: {error}')
 
     verdict = HOMEWORK_STATUSES['homework_status']
-    if 
-    ...
-
+    if verdict is None:
+        logger.error(f'Неизвестный статус домашки')
     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
-# def check_tokens():
-#     """Проверяет, передались ли все токены корректно"""
-#     return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
+def check_tokens():
+    """Проверяет, передались ли все токены корректно"""
+    return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
 
 
-# def main():
-#     """Основная логика работы бота."""
+def main():
+    """Основная логика работы бота."""
+    if not check_tokens:
+        logger.critical(f'Не передались токены')
 
-#     ...
+    bot = telegram.Bot(token=TELEGRAM_TOKEN)
+    current_timestamp = int(time.time())
 
-#     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-#     current_timestamp = int(time.time())
+    ...
 
-#     ...
+    while True:
+        try:
+            response = ...
 
-#     while True:
-#         try:
-#             response = ...
+            ...
 
-#             ...
+            current_timestamp = ...
+            time.sleep(RETRY_TIME)
 
-#             current_timestamp = ...
-#             time.sleep(RETRY_TIME)
-
-#         except Exception as error:
-#             message = f'Сбой в работе программы: {error}'
-#             ...
-#             time.sleep(RETRY_TIME)
-#         else:
-#             ...
+        except Exception as error:
+            message = f'Сбой в работе программы: {error}'
+            ...
+            time.sleep(RETRY_TIME)
+        else:
+            ...
 
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
