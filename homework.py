@@ -1,11 +1,10 @@
 import logging
 import os
-import sys
+import time
+from turtle import update
 
+from pprint import pprint
 import requests
-
-from telegram import ReplyKeyboardMarkup
-from telegram.ext import CommandHandler, Updater
 
 from dotenv import load_dotenv
 
@@ -30,15 +29,24 @@ HOMEWORK_STATUSES = {
 
 """Задана глобальная конфигурация для всех логгеров"""
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format='%(asctime)s, %(levelname)s, %(message)s, %(name)s',
     level=logging.INFO,
     filename='main.log',
     filemode='w'
     )
 
-logger = logging.getLogger(__name__)  
-handler = logging.StreamHandler(sys.stdout)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+# handler = RotatingFileHandler('my_logger.log',
+#                               maxBytes=50000000,
+#                               backupCount=5
+#                               )
+handler = logging.StreamHandler()
 logger.addHandler(handler)
+formatter = logging.Formatter(
+    '%(asctime)s - %(levelname)s - %(funcName)s - %(name)s - %(message)s',
+)
+handler.setFormatter(formatter)
 
 
 def send_message(bot, message):
@@ -49,29 +57,49 @@ def send_message(bot, message):
     except Exception as error:
         logger.error(f'Сбой при отправке сообщения в чат: {error}')
 
-# def get_api_answer(current_timestamp):
-#     timestamp = current_timestamp or int(time.time())
-#     params = {'from_date': timestamp}
 
-#     ...
+def get_api_answer(current_timestamp):
+    """Отправляет запрос к API на ENDPOINT."""
+    timestamp = current_timestamp or int(time.time())
+    params = {'from_date': timestamp}
+    try:
+        homework_statuses = requests.get(ENDPOINT, headers=HEADERS, params=params)
+        pprint(homework_statuses.json())
+        logger.info(f'Отправлен запрос к API')
+    except Exception as error:
+        logger.error(f'Сбой при отправке запроса в API: {error}')
 
 
-# def check_response(response):
+def check_response(response):
+    """Проверяем полученный API на корректность."""
+    try:
+        # response = requests.get(ENDPOINT)
+        # print(response.json()['homeworks'])
+        homework_list = response.json()['homeworks']
+        logger.info(f'Получен корректный API')
+        # pprint(homework_list)
+    except Exception as error:
+        logger.error(f'Полученный API некоректен: {error}')
 
-#     ...
 
+def parse_status(homework):
+    """Проверяет статус конкретной домашней работы."""
+    try:
+        homework_name = homework['homework_name']
+        logger.info(f'Получен ключ homework_name')
+    except Exception as error:
+        logger.error(f'Ключа homework_name нет: {error}')
+    try:
+        homework_status = homework['status']
+        logger.info(f'Получен ключ status')
+    except Exception as error:
+        logger.error(f'Ключа status нет: {error}')
 
-# def parse_status(homework):
-#     homework_name = ...
-#     homework_status = ...
+    verdict = HOMEWORK_STATUSES['homework_status']
+    if 
+    ...
 
-#     ...
-
-#     verdict = ...
-
-#     ...
-
-#     return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+    return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
 # def check_tokens():
