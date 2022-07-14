@@ -105,34 +105,52 @@ def parse_status(homework):
 def check_tokens():
     """Проверяет, передались ли все токены корректно"""
     return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
+    # return True if (PRACTICUM_TOKEN
+    #                 and TELEGRAM_TOKEN
+    #                 and TELEGRAM_CHAT_ID) else False
 
 
 def main():
     """Основная логика работы бота."""
-    if not check_tokens:
+    if not check_tokens():
+        """Делается запрос к API."""
         logger.critical(f'Не передались токены')
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())
-
-    ...
-
+    status = ''
+    error_cache_message = ''
     while True:
+        """Проверка ответа"""
         try:
-            response = ...
-
-            ...
-
-            current_timestamp = ...
+            response = get_api_answer(current_timestamp)
+            current_timestamp = response.get('current_date') 
+            status_homework = parse_status(check_response(response)) 
+            if status_homework != status: 
+                send_message(bot, status_homework) 
+                status = status_homework 
             time.sleep(RETRY_TIME)
-
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
-            ...
-            time.sleep(RETRY_TIME)
-        else:
-            ...
-
+            # logger.error(error) 
+            logger.error(message)
+            # message_t = str(error)            
+            if message != error_cache_message: 
+                send_message(bot, message) 
+                error_cache_message = message
+        time.sleep(RETRY_TIME)
 
 if __name__ == '__main__':
     main()
+
+    #         current_timestamp = response['current_date']
+    #         time.sleep(RETRY_TIME)
+
+    #     except Exception as error:
+    #         message = f'Сбой в работе программы: {error}'
+    #         ...
+    #         time.sleep(RETRY_TIME)
+    #     else:
+    #         ...
+
+
