@@ -1,5 +1,7 @@
 import logging
 import os
+from pprint import pprint
+import sys
 import time
 from http import HTTPStatus
 
@@ -48,10 +50,13 @@ logger.addHandler(handler)
 def send_message(bot, message):
     """Отправляет сообщения."""
     try:
+        logging.info(f'Отправляем сообщение в телеграм: {message}')
         bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
-        logger.info(f'Сообщение в чат отправлено: {message}')
     except Exception as error:
-        logger.error(f'Сбой при отправке сообщения в чат: {error}')
+        raise exceptions.SendMessageException()
+        # logger.error(f'Сбой при отправке сообщения в чат: {error}')
+    else:
+        logger.info(f'Сообщение в чат отправлено: {message}')
 
 
 def get_api_answer(current_timestamp):
@@ -59,6 +64,7 @@ def get_api_answer(current_timestamp):
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     try:
+        logging.info(f'Начинаем отправку запроса к API')
         answer = requests.get(
             ENDPOINT,
             headers=HEADERS,
@@ -66,20 +72,24 @@ def get_api_answer(current_timestamp):
         )
         logger.info('Отправлен запрос к API')
     except Exception as error:
-        logger.error(f'Сбой при отправке запроса в API: {error}')
-        raise exceptions.GetAPIException
+        # logger.error(f'Сбой при отправке запроса в API: {error}')
+        raise exceptions.GetAPIException()
     if answer.status_code != HTTPStatus.OK:
-        logger.error('Сбой при запросе к эндпоинту')
+        # logger.error('Сбой при запросе к эндпоинту')
         raise exceptions.GetAPIException()
     try:
         return answer.json()
     except ValueError:
         raise ValueError('Ошибка, формат не соответствует json')
 
-
 def check_response(response):
     """Проверяем полученный API на корректность."""
-    homework = response['homeworks']
+    # homework = response['homeworks']
+    pprint(response)
+    pprint(type(response))
+    homework = response.get('homeworks')
+    pprint(homework)
+    pprint(type(homework))
     logger.info('Получены ваши работы по ключу homeworks')
     if not isinstance(homework, list):
         raise exceptions.IncorrectFormatError('Неверный формат homeworks')
@@ -121,6 +131,7 @@ def main():
     if not check_tokens():
         """Делается запрос к API."""
         logger.critical('Не передались токены')
+        sys.exit(message)
 
     while True:
         try:
@@ -144,3 +155,14 @@ def main():
 
 if __name__ == '__main__':
     main()
+logging.basicConfig(
+    level=logging.INFO,
+    format=(
+        '%(asctime)s [%(levelname)s] - '
+        '(%(filename)s).%(funcName)s:%(lineno)d - %(message)s'
+    ),
+    handlers=[
+        # logging.FileHandler(f'{BASE_DIR}/output.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)

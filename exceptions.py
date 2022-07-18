@@ -12,3 +12,8 @@ class IncorrectFormatError(Exception):
     """Исключение для проверки формата на корректность."""
 
     pass
+
+class SendMessageException(Exception):
+    """Исключение для отправки сообщения."""
+
+    pass
