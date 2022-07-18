@@ -135,7 +135,6 @@ def main():
                 send_message(bot, status_homework)
                 status = status_homework
                 logger.debug('В ответе нет новых статусов')
-            time.sleep(RETRY_TIME)
         except Exception as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
